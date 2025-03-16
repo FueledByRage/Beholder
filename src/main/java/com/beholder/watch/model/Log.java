@@ -10,7 +10,7 @@ public class Log {
 
   private Watchable watchable;
 
-  private int responseTime;
+  private long responseTime;
 
   private int responseStatus;
 
@@ -20,7 +20,7 @@ public class Log {
 
   private Date updatedAt;
 
-  public Log(Long id, Watchable service, int responseTime, int responseStatus, String errorMessage, Date createdAt,
+  public Log(Long id, Watchable service, long responseTime, int responseStatus, String errorMessage, Date createdAt,
       Date updatedAt) {
     this.id = id;
     this.watchable = service;
@@ -31,7 +31,7 @@ public class Log {
     this.updatedAt = updatedAt;
   }
 
-  public Log(Watchable service, int responseTime, int responseStatus, String errorMessage) {
+  public Log(Watchable service, long responseTime, int responseStatus, String errorMessage) {
     this.watchable = service;
     this.responseTime = responseTime;
     this.responseStatus = responseStatus;
@@ -57,11 +57,11 @@ public class Log {
     this.watchable = service;
   }
 
-  public int getResponseTime() {
+  public long getResponseTime() {
     return responseTime;
   }
 
-  public void setResponseTime(int responseTime) {
+  public void setResponseTime(long responseTime) {
     this.responseTime = responseTime;
   }
 

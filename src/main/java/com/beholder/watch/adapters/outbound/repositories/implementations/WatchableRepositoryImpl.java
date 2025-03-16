@@ -47,10 +47,9 @@ public class WatchableRepositoryImpl implements WatchableRepository {
   }
 
   @Override
-  public List<Watchable> findAll(int page, int size) {
+  public List<Watchable> findAll(int size, int page) {
     Pageable pageable = PageRequest.of(page, size);
     Page<JpaEntityWatchable> jpaEntityWatchables = jpaWatchableRepository.findAll(pageable);
-
     return jpaEntityWatchables.getContent().stream().map(entity -> new Watchable(entity.getId(), entity.getName(),
         entity.getUrl(), entity.getCheckInterval(), entity.getStatus(), entity.getCreatedAt(), entity.getUpdatedAt()))
         .collect(Collectors.toList());

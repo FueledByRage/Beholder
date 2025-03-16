@@ -34,7 +34,7 @@ public class JpaEntityLog {
   @JoinColumn(name = "watchable_id", referencedColumnName = "id", nullable = false)
   private JpaEntityWatchable watchable;
 
-  private int responseTime;
+  private long responseTime;
 
   private int responseStatus;
 

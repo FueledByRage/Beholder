@@ -77,8 +77,7 @@ public class WatchableMonitorService implements WatchableMonitorUseCase{
         ).increment();
     }
 
-    private void recordResponseTime(String serviceName, int timeInMs) {
-        long responseTime = (long) timeInMs;
+    private void recordResponseTime(String serviceName, long responseTime) {
             responseTimers.computeIfAbsent(serviceName, name ->
                 Timer.builder("service_response_time")
                     .tag("service", name)

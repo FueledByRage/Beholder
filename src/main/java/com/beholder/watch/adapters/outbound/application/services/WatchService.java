@@ -11,6 +11,7 @@ import com.beholder.watch.model.watchable.Watchable;
 import com.beholder.watch.model.watchable.WatchableStatus;
 import com.beholder.watch.usecases.HttpUseCase;
 import com.beholder.watch.usecases.LogUseCases;
+import com.beholder.watch.usecases.ScheduleUseCase;
 import com.beholder.watch.usecases.WatchUseCase;
 import com.beholder.watch.usecases.WatchableUseCases;
 import com.beholder.watch.usecases.WatchableMonitorUseCase;
@@ -22,6 +23,8 @@ import org.springframework.context.annotation.Lazy;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import javax.annotation.PostConstruct;
+
 
 @Service
 public class WatchService implements WatchUseCase {
@@ -41,16 +44,21 @@ public class WatchService implements WatchUseCase {
   @Autowired
   private TaskManagerUseCase taskManager;
 
+  @Autowired
+  private ScheduleUseCase scheduleService;
+
   public WatchService(LogUseCases logService, HttpUseCase httpService, @Lazy JpaWatchableService watchableService,
-      WatchableMonitorUseCase watchableMonitorService, TaskManagerUseCase taskManager) {
+      WatchableMonitorUseCase watchableMonitorService, TaskManagerUseCase taskManager, ScheduleUseCase scheduleService) {
     this.logService = logService;
     this.httpService = httpService;
     this.watchableService = watchableService;
     this.watchableMonitorService = watchableMonitorService;
     this.taskManager = taskManager;
+    this.scheduleService = scheduleService;
   }
 
 
+  @PostConstruct
   @Override
   public void init() {
     this.start();
@@ -63,21 +71,26 @@ public class WatchService implements WatchUseCase {
 
   @Override
   public void start(int size, int page) {
-      List<Watchable> watchables;
       int currentPage = page;
       
-      do {
-          watchables = watchableService.findByPage(size, currentPage);
-          
-          if (watchables.size() > 0) {
-              final List<Watchable> currentWatchables = watchables;
-              this.taskManager.sendToCluster(() -> this.startWatchables(currentWatchables));
-              currentPage++;
+      boolean hasWatchablesLeft = true;
+
+
+      while (hasWatchablesLeft) {
+          List<Watchable> watchables = this.watchableService.findByPage(size, currentPage);
+          if (watchables.isEmpty()) {
+              hasWatchablesLeft = false;
+              return;
           }
-      } while (watchables.size() > 0);
+  
+          this.taskManager.sendToCluster(() -> this.startWatchables(watchables));
+          
+          currentPage++;
+      }
       
       this.taskManager.stop();
   }
+  
 
   public void watch(Watchable watchable) {
     HttpResponseDetails response = this.getHttpResponseDetails(watchable);
@@ -91,7 +104,8 @@ public class WatchService implements WatchUseCase {
 
   private void startWatchables(List<Watchable> watchables) {
     watchables.stream()
-        .forEach(watchable -> this.watch(watchable));
+        .forEach(watchable -> scheduleService.scheduleTask(() -> this.watch(watchable),
+        watchable.getCheckInterval().longValue() ));
   }
 
   private void updateWatchableStatus(Watchable watchable, HttpResponseDetails response) {

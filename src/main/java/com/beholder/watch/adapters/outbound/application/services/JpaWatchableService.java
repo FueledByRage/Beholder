@@ -47,7 +47,7 @@ public class JpaWatchableService implements WatchableUseCases {
 
   @Override
   public Watchable startWatch(CreateWatchable createWatchableRequest) {
-    Watchable watchable = save(createWatchableRequest);
+    Watchable watchable = this.save(createWatchableRequest);
 
     scheduleService.scheduleTask(() -> this.watchService.watch(watchable),
         createWatchableRequest.getCheckInterval().longValue());

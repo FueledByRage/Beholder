@@ -21,7 +21,7 @@ import javax.validation.constraints.Min;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HttpResponseDetailsDto implements HttpResponseDetails {
-  private int responseTime;
+  private long responseTime;
 
   private int responseStatus;
 
