@@ -17,12 +17,16 @@ import com.beholder.watch.adapters.inbound.dtos.HttpResponseDetailsDto;
 
 import com.beholder.watch.usecases.HttpUseCase;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class HttpService implements HttpUseCase {
 
-  private final RestTemplate restTemplate = new RestTemplate();
+  private final RestTemplate restTemplate;
 
   private final String SERVICE_UNAVAILABLE_MESSAGE = "Service Unavailable";
+
 
   @Override
   public HttpResponseDetails getRequest(String url) {
