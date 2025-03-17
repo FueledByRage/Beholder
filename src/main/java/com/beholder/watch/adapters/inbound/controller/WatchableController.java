@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.beholder.watch.dto.CreateWatchableDto;
+import com.beholder.watch.adapters.inbound.dtos.CreateWatchableDto;
 import com.beholder.watch.dtos.outbound.WatchableOutput;
 import com.beholder.watch.adapters.inbound.dtos.WatchableOutputDto;
 
