@@ -13,9 +13,7 @@ import com.beholder.watch.usecases.ScheduleUseCase;
 @RequiredArgsConstructor
 public class TaskManagerService implements TaskManagerUseCase {
 
-  private final WatchableUseCases watchableService;
   private final ExecutorService cluster;
-  private final ScheduleUseCase scheduleService;
 
   @Override
   public void sendToCluster(Runnable task) {

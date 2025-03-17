@@ -28,7 +28,6 @@ public class WatchableMonitorService implements WatchableMonitorUseCase{
   private final ConcurrentHashMap<String, AtomicInteger> responseStatuses = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, Counter> requestCounters = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, Timer> responseTimers = new ConcurrentHashMap<>();
-  private final ConcurrentHashMap<String, AtomicLong> errorMessage = new ConcurrentHashMap<>();
 
   public WatchableMonitorService(MeterRegistry registry) {
         this.registry = registry;
@@ -96,9 +95,7 @@ public class WatchableMonitorService implements WatchableMonitorUseCase{
             return;
         }
                     
-        String truncatedError = errorMessage.length() > 100 ? 
-                               errorMessage.substring(0, 100) + "..." : 
-                               errorMessage;
+        String truncatedError = this.getTruncatedErrorMessage(errorMessage);
         
         Counter.builder("service_error_count")
             .tag("service", serviceName)
@@ -107,5 +104,11 @@ public class WatchableMonitorService implements WatchableMonitorUseCase{
             .register(registry)
             .increment();
             
-    }    
+    }
+
+    private String getTruncatedErrorMessage(String errorMessage) {
+        return errorMessage.length() > 100 ? 
+               errorMessage.substring(0, 100) + "..." : 
+               errorMessage;
+    }
 }

@@ -1,6 +1,7 @@
 package com.beholder.watch.adapters.outbound.application.services;
 
 import com.beholder.watch.model.watchable.WatchableStatus;
+import java.net.ConnectException;
 import org.springframework.stereotype.Service;
 
 import org.springframework.web.client.RestTemplate;
@@ -20,6 +21,8 @@ import com.beholder.watch.usecases.HttpUseCase;
 public class HttpService implements HttpUseCase {
 
   private final RestTemplate restTemplate = new RestTemplate();
+
+  private final String SERVICE_UNAVAILABLE_MESSAGE = "Service Unavailable";
 
   @Override
   public HttpResponseDetails getRequest(String url) {
@@ -47,7 +50,7 @@ public class HttpService implements HttpUseCase {
           .responseTime(0)
           .watchableStatus(WatchableStatus.DOWN)
           .responseStatus(HttpStatus.SERVICE_UNAVAILABLE.value())
-          .errorMessage("Service Unavailable")
+          .errorMessage(SERVICE_UNAVAILABLE_MESSAGE)
           .build();
     }
   }

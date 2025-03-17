@@ -25,7 +25,6 @@ import com.beholder.watch.usecases.WatchUseCase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
-
 @Service
 public class JpaWatchableService implements WatchableUseCases {
 

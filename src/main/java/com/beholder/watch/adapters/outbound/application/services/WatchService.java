@@ -1,10 +1,11 @@
 package com.beholder.watch.adapters.outbound.application.services;
 
 import com.beholder.watch.usecases.TaskManagerUseCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory; 
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
-
+import com.beholder.watch.adapters.inbound.dtos.HttpResponseDetailsDto;
 import com.beholder.watch.dtos.usecases.HttpResponseDetails;
 import com.beholder.watch.model.Log;
 import com.beholder.watch.model.watchable.Watchable;
@@ -22,33 +23,31 @@ import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.PostConstruct;
 
 
 @Service
 public class WatchService implements WatchUseCase {
 
-  @Autowired
   private final LogUseCases logService;
-
-  @Autowired
   private final HttpUseCase httpService;
-
-  @Autowired
   private final JpaWatchableService watchableService;
-
-  @Autowired
   private final WatchableMonitorUseCase watchableMonitorService;
+  private final TaskManagerUseCase taskManager;
+  private final ScheduleUseCase scheduleService;
+  
+  private static final Logger logger = LoggerFactory.getLogger(WatchService.class);
+  
+  private static final int DEFAULT_PAGE_SIZE = 10;
+  private static final int DEFAULT_START_PAGE = 0;
+  private static final int MAX_PAGES = 1000;
 
-  @Autowired
-  private TaskManagerUseCase taskManager;
-
-  @Autowired
-  private ScheduleUseCase scheduleService;
-
-  public WatchService(LogUseCases logService, HttpUseCase httpService, @Lazy JpaWatchableService watchableService,
-      WatchableMonitorUseCase watchableMonitorService, TaskManagerUseCase taskManager, ScheduleUseCase scheduleService) {
+  public WatchService(LogUseCases logService, 
+                     HttpUseCase httpService, 
+                     @Lazy JpaWatchableService watchableService,
+                     WatchableMonitorUseCase watchableMonitorService, 
+                     TaskManagerUseCase taskManager, 
+                     ScheduleUseCase scheduleService) {
     this.logService = logService;
     this.httpService = httpService;
     this.watchableService = watchableService;
@@ -57,63 +56,84 @@ public class WatchService implements WatchUseCase {
     this.scheduleService = scheduleService;
   }
 
-
   @PostConstruct
   @Override
   public void init() {
+    logger.info("Initializing WatchService");
     this.start();
   }
 
   @Override
   public void start() {
-    this.start(10, 0);
+    this.start(DEFAULT_PAGE_SIZE, DEFAULT_START_PAGE);
   }
 
   @Override
   public void start(int size, int page) {
+    try {
+      logger.info("Starting watchable monitoring with page size: {}, starting from page: {}", size, page);
+
       int currentPage = page;
+      int pageCount = 0;
       
       boolean hasWatchablesLeft = true;
 
+      while (hasWatchablesLeft && pageCount < MAX_PAGES) {
+        List<Watchable> watchables = this.watchableService.findByPage(size, currentPage);
 
-      while (hasWatchablesLeft) {
-          List<Watchable> watchables = this.watchableService.findByPage(size, currentPage);
-          if (watchables.isEmpty()) {
-              hasWatchablesLeft = false;
-              return;
-          }
-  
+        if (watchables.isEmpty()) {
+          hasWatchablesLeft = false;
+
+          logger.info("No more watchables found after processing {} pages", pageCount);
+        } else {
+          logger.debug("Found {} watchables on page {}", watchables.size(), currentPage);
+
           this.taskManager.sendToCluster(() -> this.startWatchables(watchables));
-          
+
           currentPage++;
+          pageCount++;
+        }
       }
       
-      this.taskManager.stop();
+      if (pageCount >= MAX_PAGES) {
+        logger.warn("Reached maximum page limit ({}). Some watchables may not be monitored.", MAX_PAGES);
+      }
+      
+    } catch (Exception e) {
+      logger.error("Error starting watchable monitoring", e);
+    }
   }
-  
 
   public void watch(Watchable watchable) {
-    HttpResponseDetails response = this.getHttpResponseDetails(watchable);
+      HttpResponseDetails response = this.getHttpResponseDetails(watchable);
 
-    this.updateWatchableStatus(watchable.getId(), response);
+      this.updateWatchableStatus(watchable.getId(), response);
 
-    this.saveLog(watchable, response);
+      this.saveLog(watchable, response);
 
-    this.watchableMonitorService.updateMetrics(watchable.getName(), response);
-  }
+      this.watchableMonitorService.updateMetrics(watchable.getName(), response);
+    }
 
   private void startWatchables(List<Watchable> watchables) {
-    watchables.stream()
-        .forEach(watchable -> scheduleService.scheduleTask(() -> this.watch(watchable),
-        watchable.getCheckInterval().longValue() ));
+    try {
+      for (Watchable watchable : watchables) {
+        scheduleService.scheduleTask(
+            () -> this.watch(watchable),
+            watchable.getCheckInterval().longValue()
+        );
+
+        logger.debug("Scheduled watchable: {} with interval: {} seconds", 
+                     watchable.getName(), watchable.getCheckInterval());
+      }
+    } catch (Exception e) {
+      logger.error("Error scheduling watchables", e);
+    }
   }
 
   private void updateWatchableStatus(long id, HttpResponseDetails response) {
-    if (this.isServiceUnavailable(response)) {
-      this.watchableService.updateWatchableStatus(id, WatchableStatus.UP);
-    } else {
-      this.watchableService.updateWatchableStatus(id, WatchableStatus.DOWN);
-    }
+    WatchableStatus status = isServiceUnavailable(response) ? WatchableStatus.DOWN : WatchableStatus.UP;
+
+    this.watchableService.updateWatchableStatus(id, status);
   }
 
   private boolean isServiceUnavailable(HttpResponseDetails response) {
@@ -129,5 +149,4 @@ public class WatchService implements WatchUseCase {
 
     this.logService.save(log);
   }
-
 }
