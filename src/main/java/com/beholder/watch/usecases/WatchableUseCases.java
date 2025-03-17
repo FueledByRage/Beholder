@@ -13,11 +13,9 @@ public interface WatchableUseCases {
 
   public Watchable save(CreateWatchable watchable);
 
-  public Watchable update(Long id, CreateWatchable watchable);
-
   public Optional<Watchable> findById(Long id);
 
   public List<Watchable> findByPage(int size, int page);
 
-  public void updateWatchableStatus(Watchable watchable, WatchableStatus status);
+  public void updateWatchableStatus(Long id, WatchableStatus status);
 }

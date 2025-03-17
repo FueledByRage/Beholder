@@ -95,7 +95,7 @@ public class WatchService implements WatchUseCase {
   public void watch(Watchable watchable) {
     HttpResponseDetails response = this.getHttpResponseDetails(watchable);
 
-    this.updateWatchableStatus(watchable, response);
+    this.updateWatchableStatus(watchable.getId(), response);
 
     this.saveLog(watchable, response);
 
@@ -108,11 +108,11 @@ public class WatchService implements WatchUseCase {
         watchable.getCheckInterval().longValue() ));
   }
 
-  private void updateWatchableStatus(Watchable watchable, HttpResponseDetails response) {
+  private void updateWatchableStatus(long id, HttpResponseDetails response) {
     if (this.isServiceUnavailable(response)) {
-      this.watchableService.updateWatchableStatus(watchable, WatchableStatus.UP);
+      this.watchableService.updateWatchableStatus(id, WatchableStatus.UP);
     } else {
-      this.watchableService.updateWatchableStatus(watchable, WatchableStatus.DOWN);
+      this.watchableService.updateWatchableStatus(id, WatchableStatus.DOWN);
     }
   }
 

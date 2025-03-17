@@ -25,11 +25,6 @@ public class JpaLogService implements LogUseCases {
   }
 
   @Override
-  public Log update(Log log) {
-    return this.logRepository.save(log);
-  }
-
-  @Override
   public Optional<Log> findById(Long id) {
     return this.logRepository.findById(id);
   }

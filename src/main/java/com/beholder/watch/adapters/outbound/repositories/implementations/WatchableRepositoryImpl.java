@@ -8,6 +8,8 @@ import com.beholder.watch.adapters.outbound.entities.JpaEntityWatchable;
 import com.beholder.watch.model.watchable.Watchable;
 import com.beholder.watch.repository.WatchableRepository;
 
+import com.beholder.watch.model.watchable.WatchableStatus;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,9 +49,16 @@ public class WatchableRepositoryImpl implements WatchableRepository {
   }
 
   @Override
+  public int updateStatus(Long id, WatchableStatus status) {
+    return jpaWatchableRepository.updateWatchableStatus(id, status);
+  }
+
+  @Override
   public List<Watchable> findAll(int size, int page) {
     Pageable pageable = PageRequest.of(page, size);
+
     Page<JpaEntityWatchable> jpaEntityWatchables = jpaWatchableRepository.findAll(pageable);
+    
     return jpaEntityWatchables.getContent().stream().map(entity -> new Watchable(entity.getId(), entity.getName(),
         entity.getUrl(), entity.getCheckInterval(), entity.getStatus(), entity.getCreatedAt(), entity.getUpdatedAt()))
         .collect(Collectors.toList());

@@ -8,8 +8,6 @@ public interface LogUseCases {
 
   public Log save(Log log);
 
-  public Log update(Log log);
-
   public Optional<Log> findById(Long id);
 
 }

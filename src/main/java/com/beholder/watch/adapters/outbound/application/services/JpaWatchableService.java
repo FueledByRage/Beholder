@@ -72,24 +72,12 @@ public class JpaWatchableService implements WatchableUseCases {
   }
 
   @Override
-  public Watchable update(Long id, CreateWatchable watchable) throws UnsupportedOperationException {
-    throw new UnsupportedOperationException("Not implemented yet");
-  }
-
-  @Override
-  public void updateWatchableStatus(Watchable watchable, WatchableStatus status) {
-    if (watchable.getStatus() == status) {
-      return;
-    }
-
-    watchable.setStatus(status);
-
-    this.watchableRepository.save(watchable);
+  public void updateWatchableStatus(Long id, WatchableStatus status) {
+    this.watchableRepository.updateStatus(id, status);
   }
 
   @Override
   public List<Watchable> findByPage(int size, int page) {
     return this.watchableRepository.findAll(size, page);
   }
-
 }
