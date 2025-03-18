@@ -31,7 +31,7 @@ public class WatchableMonitorService implements WatchableMonitorUseCase{
 
   public WatchableMonitorService(MeterRegistry registry) {
         this.registry = registry;
-}
+  }
 
 
   @Override
