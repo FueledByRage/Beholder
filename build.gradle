@@ -38,3 +38,27 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+tasks.register('migrateAndRun') {
+    group = 'application'
+    description = 'Executa a migração e inicia a aplicação.'
+
+    doLast {
+        def migrationScript = './run_migration.sh'
+
+        println 'Executando script de migração...'
+        def process = new ProcessBuilder('bash', '-c', migrationScript)
+            .inheritIO()
+            .start()
+
+        def exitCode = process.waitFor()
+        if (exitCode != 0) {
+            throw new GradleException("Erro ao executar a migração! Código de saída: $exitCode")
+        }
+
+        println 'Iniciando a aplicação...'
+        exec {
+            commandLine 'gradle', 'bootRun'
+        }
+    }
+}

@@ -28,3 +28,76 @@ Atualmente, o sistema fornece uma visão clara do status dos serviços monitorad
 
 ### Variação de status Http por serviço
 ![Variação de status Http por serviço](/assets/mudanca-de-status-http-por-servico.png)
+
+## Detalhes Técnicos  
+
+O sistema foi desenvolvido em **Java 8**, seguindo a **arquitetura de Adapters** para garantir um alto nível de desacoplamento. Com essa abordagem, os serviços implementados podem ser facilmente substituídos ou estendidos sem impactar o restante da aplicação, tornando o sistema mais flexível e adaptável a diferentes necessidades.  
+
+A aplicação usa **Spring Boot** para gerenciar a lógica de monitoramento e agendar as requisições. Os dados coletados são armazenados em um **PostgreSQL**, enquanto o **Prometheus** faz a coleta e o armazenamento otimizado das métricas. Para análise e visualização, o **Grafana** permite a criação de dashboards interativos, facilitando o acompanhamento do desempenho e da disponibilidade dos serviços monitorados.  
+
+Com essa estrutura, o sistema pode evoluir com facilidade, permitindo mudanças e integrações sem grandes impactos na base de código.
+
+# Setup
+
+## Envs
+
+   - Crie um arquivo `.env` na raiz do projeto seguindo o modelo disponibilizado em `.env.sample`.  
+
+   - Preencha as variáveis conforme necessário, incluindo as credenciais do banco de dados e configurações dos serviços.  
+## Containers
+
+Os serviços que o sistema necessita são rodados em containers docker que são orquestrados via docker-compose, no arquivo docker-compose.local.yml
+
+Execute o seguinte comando para iniciar os contêineres necessários:  
+     
+```sh
+    docker compose -f docker-compose.local.yml up -d
+```  
+
+Esse comando orquestra os seguintes serviços:
+
+   **Database**: Armazena as informações de serviços observados, logs e notificações
+
+   **Prometheus**: Coleta e armazena os dados do sistema.  
+
+   **Grafana**: Exibe as métricas em dashboards interativos.  
+
+   **Adminer**: Interface para gerenciar o banco de dados.  
+
+Com os serviços em execução, o sistema estará pronto para coletar e visualizar métricas em tempo real.
+
+
+## Migrations 
+
+Este repositório contém um script Bash para executar migrações no banco de dados PostgreSQL, garantindo que o cliente psql esteja instalado antes da execução.
+
+Os dados migrados são apenas para testes locais, não devendo ser usados em ambientes de produção.
+
+Para executar a migração, execute a task migrateAndRun do gradle
+
+```bash
+gradle migrateAndRun
+```
+
+ou
+
+```bash
+./gradlew migrateAndRun
+```
+
+Também é possível executar a migration seguindo os passos abaixo.
+
+
+- 1: Conceda permissão de execução ao script:
+
+```bash
+chmod +x ./scripts/migrations.sh
+
+```
+
+- 2 Execute a migração
+
+
+```bash
+./scripts/migrations.sh
+```
