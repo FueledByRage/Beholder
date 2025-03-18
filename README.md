@@ -1,3 +1,9 @@
+
+<img src="./assets/beholder.png" 
+        alt="Picture" 
+        width="200" 
+        height="200" 
+        style="display: block; margin: 0 auto" />
 <h1 style="text-align:center;">Beholder</h1>
 <h3 style="text-align:center;">Sistema de monitoramento de serviços</h3>
 
@@ -10,3 +16,15 @@ A cada intervalo de tempo configurado, o sistema realiza requisições aos servi
 
 Atualmente, o sistema fornece uma visão clara do status dos serviços monitorados, ajudando na manutenção preventiva e na rápida identificação de problemas. Como melhoria futura, será implementado um sistema de notificações, permitindo alertas automáticos sempre que uma anomalia for detectada, garantindo ainda mais agilidade na resposta a incidentes.
 
+## Alguns dashboards criados 
+
+### Tempo de resposta medio por serviço
+![Tempo de resposta medio por serviço](/assets/tempo-de-resposta-medio-por-servico.png)
+
+### Taxa de erro por serviço
+
+![Taxa de erro por serviço](/assets/taxa-de-erro-por-servico.png)
+
+
+### Variação de status Http por serviço
+![Variação de status Http por serviço](/assets/mudanca-de-status-http-por-servico.png)
