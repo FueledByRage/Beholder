@@ -1,8 +1,8 @@
 <p align="center">
   <img src="./assets/beholder.png" alt="logo" width="200" height="200" />
 </p>
-<h1 style="text-align:center;">Beholder</h1>
-<h3 style="text-align:center;">Sistema de monitoramento de serviços</h3>
+<h1 align="center">Beholder</h1>
+<h3 align="center">Sistema de monitoramento de serviços</h3>
 
 
 ## Objetivo
