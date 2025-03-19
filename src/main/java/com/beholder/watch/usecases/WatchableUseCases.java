@@ -18,4 +18,6 @@ public interface WatchableUseCases {
   public List<Watchable> findByPage(int size, int page);
 
   public void updateWatchableStatus(Long id, WatchableStatus status);
+
+  public Optional<Watchable> findByName(String name);
 }

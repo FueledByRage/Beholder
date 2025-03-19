@@ -8,7 +8,7 @@ public class Notification {
 
   private Long id;
 
-  private Watchable service;
+  private Watchable watchable;
 
   private String message;
 
@@ -16,7 +16,13 @@ public class Notification {
 
   public Notification(Long id, Watchable service, String message, Date sentAt) {
     this.id = id;
-    this.service = service;
+    this.watchable = service;
+    this.message = message;
+    this.sentAt = sentAt;
+  }
+  
+  public Notification(Watchable service, String message, Date sentAt) {
+    this.watchable = service;
     this.message = message;
     this.sentAt = sentAt;
   }
@@ -32,12 +38,12 @@ public class Notification {
     this.id = id;
   }
 
-  public Watchable getService() {
-    return service;
+  public Watchable getWatchable() {
+    return watchable;
   }
 
-  public void setService(Watchable service) {
-    this.service = service;
+  public void setWatchable(Watchable service) {
+    this.watchable = service;
   }
 
   public String getMessage() {

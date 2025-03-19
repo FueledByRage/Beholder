@@ -15,4 +15,6 @@ public interface WatchableRepository {
   List<Watchable> findAll(int page, int size);
 
   int updateStatus(Long id, WatchableStatus status);
+
+  Optional<Watchable> findByName(String name);
 }

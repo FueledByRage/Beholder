@@ -79,4 +79,9 @@ public class JpaWatchableService implements WatchableUseCases {
   public List<Watchable> findByPage(int size, int page) {
     return this.watchableRepository.findAll(size, page);
   }
+
+  @Override
+  public Optional<Watchable> findByName(String name) {
+    return this.watchableRepository.findByName(name);
+  }
 }

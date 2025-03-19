@@ -1,5 +1,6 @@
 package com.beholder.watch.adapters.outbound.repositories.implementations;
 
+import com.beholder.watch.adapters.utils.mappers.WatchableMapper;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -18,15 +19,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.beholder.watch.adapters.outbound.repositories.JpaWatchableRepository;
+import lombok.RequiredArgsConstructor;
 
 @Repository
+@RequiredArgsConstructor
 public class WatchableRepositoryImpl implements WatchableRepository {
 
   private final JpaWatchableRepository jpaWatchableRepository;
-
-  public WatchableRepositoryImpl(JpaWatchableRepository jpaWatchableRepository) {
-    this.jpaWatchableRepository = jpaWatchableRepository;
-  }
+  private final WatchableMapper watchableMapper;
 
   @Override
   public Watchable save(Watchable watchable) {
@@ -34,9 +34,7 @@ public class WatchableRepositoryImpl implements WatchableRepository {
 
     JpaEntityWatchable savedEntity = jpaWatchableRepository.save(jpaEntityWatchable);
 
-    return new Watchable(savedEntity.getId(), savedEntity.getName(), savedEntity.getUrl(),
-        savedEntity.getCheckInterval(), savedEntity.getStatus(), savedEntity.getCreatedAt(),
-        savedEntity.getUpdatedAt());
+    return watchableMapper.mapToWatchable(savedEntity);
   }
 
   @Override
@@ -44,8 +42,7 @@ public class WatchableRepositoryImpl implements WatchableRepository {
     Optional<JpaEntityWatchable> jpaEntityWatchable = jpaWatchableRepository.findById(id).map(Optional::of)
         .orElseGet(Optional::empty);
 
-    return jpaEntityWatchable.map(entity -> new Watchable(entity.getId(), entity.getName(), entity.getUrl(),
-        entity.getCheckInterval(), entity.getStatus(), entity.getCreatedAt(), entity.getUpdatedAt()));
+    return jpaEntityWatchable.map(watchableMapper::mapToWatchable);
   }
 
   @Override
@@ -59,8 +56,11 @@ public class WatchableRepositoryImpl implements WatchableRepository {
 
     Page<JpaEntityWatchable> jpaEntityWatchables = jpaWatchableRepository.findAll(pageable);
     
-    return jpaEntityWatchables.getContent().stream().map(entity -> new Watchable(entity.getId(), entity.getName(),
-        entity.getUrl(), entity.getCheckInterval(), entity.getStatus(), entity.getCreatedAt(), entity.getUpdatedAt()))
-        .collect(Collectors.toList());
+    return jpaEntityWatchables.getContent().stream().map(watchableMapper::mapToWatchable).collect(Collectors.toList());
+  }
+
+  @Override
+  public Optional<Watchable> findByName(String name) {
+    return this.jpaWatchableRepository.findByName(name).map(watchableMapper::mapToWatchable);
   }
 }

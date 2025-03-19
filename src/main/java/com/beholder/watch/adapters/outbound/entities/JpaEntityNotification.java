@@ -12,8 +12,17 @@ import javax.persistence.Table;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import lombok.Data;
+import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 @Entity
 @Table(name = "notifications")
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class JpaEntityNotification {
 
   @Id
@@ -22,7 +31,7 @@ public class JpaEntityNotification {
 
   @ManyToOne
   @JoinColumn(name = "watchable_id", referencedColumnName = "id", nullable = false)
-  private JpaEntityWatchable service;
+  private JpaEntityWatchable watchable;
 
   private String message;
 
