@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.beholder.watch.dtos.usecases.HttpResponseDetails;
 import com.beholder.watch.adapters.inbound.dtos.HttpResponseDetailsDto;
@@ -31,31 +32,55 @@ public class HttpService implements HttpUseCase {
   @Override
   public HttpResponseDetails getRequest(String url) {
     try {
-      long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
 
-      HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<String> entity = new HttpEntity<>(headers);
 
-      HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
-      ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        long endTime = System.currentTimeMillis();
+        int responseTime = (int) (endTime - startTime);
 
-      long endTime = System.currentTimeMillis();
-
-      int responseTime = (int) (endTime - startTime);
-
-      return HttpResponseDetailsDto.builder()
-          .responseTime(responseTime)
-          .watchableStatus(WatchableStatus.UP)
-          .responseStatus(response.getStatusCodeValue())
-          .errorMessage(response.getStatusCode().getReasonPhrase())
-          .build();
+        return HttpResponseDetailsDto.builder()
+            .responseTime(responseTime)
+            .watchableStatus(WatchableStatus.UP)
+            .responseStatus(response.getStatusCodeValue())
+            .errorMessage(response.getStatusCode().getReasonPhrase())
+            .build();
+      
+    } catch (HttpClientErrorException.BadRequest e) {
+        return HttpResponseDetailsDto.builder()
+            .responseTime(0)
+            .watchableStatus(WatchableStatus.DOWN)
+            .responseStatus(HttpStatus.BAD_REQUEST.value())
+            .errorMessage(e.getResponseBodyAsString())
+            .build();
+      
+    } catch (HttpClientErrorException.Unauthorized e) {
+        return HttpResponseDetailsDto.builder()
+            .responseTime(0)
+            .watchableStatus(WatchableStatus.DOWN)
+            .responseStatus(HttpStatus.UNAUTHORIZED.value())
+            .errorMessage(e.getResponseBodyAsString())
+            .build();
+      
     } catch (ResourceAccessException e) {
-      return HttpResponseDetailsDto.builder()
-          .responseTime(0)
-          .watchableStatus(WatchableStatus.DOWN)
-          .responseStatus(HttpStatus.SERVICE_UNAVAILABLE.value())
-          .errorMessage(SERVICE_UNAVAILABLE_MESSAGE)
-          .build();
+        return HttpResponseDetailsDto.builder()
+            .responseTime(0)
+            .watchableStatus(WatchableStatus.DOWN)
+            .responseStatus(HttpStatus.SERVICE_UNAVAILABLE.value())
+            .errorMessage(SERVICE_UNAVAILABLE_MESSAGE)
+            .build();
+      
+    } catch (Exception e) {
+        return HttpResponseDetailsDto.builder()
+            .responseTime(0)
+            .watchableStatus(WatchableStatus.DOWN)
+            .responseStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .errorMessage(e.getMessage())
+            .build();
     }
-  }
+}
+
 }
