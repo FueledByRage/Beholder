@@ -41,12 +41,12 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-tasks.register('migrateAndRun') {
+task migrateAndRun {
     group = 'application'
     description = 'Executa a migração e inicia a aplicação.'
 
     doLast {
-        def migrationScript = './run_migration.sh'
+        def migrationScript = './scripts/migrations.sh'
 
         println 'Executando script de migração...'
         def process = new ProcessBuilder('bash', '-c', migrationScript)
@@ -57,10 +57,32 @@ tasks.register('migrateAndRun') {
         if (exitCode != 0) {
             throw new GradleException("Erro ao executar a migração! Código de saída: $exitCode")
         }
-
-        println 'Iniciando a aplicação...'
-        exec {
-            commandLine 'gradle', 'bootRun'
-        }
     }
+}
+
+task bootRunApp(type: Exec) {
+    group = 'application'
+    description = 'Inicia a aplicação após a migração.'
+    commandLine 'gradle', 'bootRun'
+}
+
+bootRunApp.mustRunAfter migrateAndRun
+
+task migrateAndRunAll {
+    dependsOn migrateAndRun, bootRunApp
+    group = 'application'
+    description = 'Executa a migração e inicia a aplicação em sequência.'
+}
+
+
+task dockerComposeUp(type: Exec) {
+    group = 'docker'
+    description = 'Inicia os serviços definidos no docker-compose.local.yml'
+    commandLine 'docker', 'compose', '-f', 'docker-compose.local.yml', 'up', '-d'
+}
+
+task dockerComposeDown(type: Exec) {
+    group = 'docker'
+    description = 'Encerra os serviços do docker-compose.local.yml'
+    commandLine 'docker', 'compose', '-f', 'docker-compose.local.yml', 'down'
 }

@@ -36,6 +36,11 @@ Com essa estrutura, o sistema pode evoluir com facilidade, permitindo mudanças 
 
 # Setup
 
+## Dependências 
+
+- Java 8 ou 11
+- Gradle 6.4
+
 ## Envs
 
    - Crie um arquivo `.env` na raiz do projeto seguindo o modelo disponibilizado em `.env.sample`.  
@@ -48,7 +53,7 @@ Os serviços que o sistema necessita são rodados em containers docker que são 
 Execute o seguinte comando para iniciar os contêineres necessários:  
      
 ```sh
-    docker compose -f docker-compose.local.yml up -d
+   gradle dockerComposeUp
 ```  
 
 Esse comando orquestra os seguintes serviços:
@@ -63,6 +68,11 @@ Esse comando orquestra os seguintes serviços:
 
 Com os serviços em execução, o sistema estará pronto para coletar e visualizar métricas em tempo real.
 
+Se for necessario derrubar os containers, execute o comando 
+
+```sh
+   gradle dockerComposeDown
+```  
 
 ## Migrations 
 
