@@ -7,6 +7,16 @@ END $$;
 
 CREATE SEQUENCE IF NOT EXISTS watchables_id_seq;
 
+CREATE TABLE IF NOT EXISTS watchables (
+    id BIGINT PRIMARY KEY DEFAULT nextval('watchables_id_seq'),
+    name VARCHAR(255) NOT NULL,
+    url VARCHAR(1024) NOT NULL,
+    check_interval INTEGER NOT NULL,
+    status watchablestatus NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 ALTER TABLE watchables ALTER COLUMN id SET DEFAULT nextval('watchables_id_seq');
 
 INSERT INTO watchables (name, url, check_interval, status, created_at, updated_at)
