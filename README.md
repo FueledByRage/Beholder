@@ -13,7 +13,19 @@ A cada intervalo de tempo configurado, o sistema realiza requisições aos servi
 
 Atualmente, o sistema fornece uma visão clara do status dos serviços monitorados, ajudando na manutenção preventiva e na rápida identificação de problemas. Como melhoria futura, será implementado um sistema de notificações, permitindo alertas automáticos sempre que uma anomalia for detectada, garantindo ainda mais agilidade na resposta a incidentes.
 
-## Alguns dashboards criados 
+Acessando o Grafana
+
+Para visualizar os dashboards, acesse o Grafana no endereço padrão, localhost:3000.
+
+As credenciais padrão são:
+
+* Usuário: admin
+
+* Senha: admin
+
+Já existe um dashboard configurado, exibindo métricas essenciais sobre os serviços monitorados. Ele pode ser acessado no menu "Dashboards" dentro do Grafana.
+
+## Algmas views criadas no dashboard
 
 ### Tempo de resposta medio por serviço
 ![Tempo de resposta medio por serviço](/assets/tempo-de-resposta-medio-por-servico.png)
