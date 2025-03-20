@@ -91,7 +91,9 @@ Se for necessario derrubar os containers, execute o comando
 
 ## Migrations 
 
-Este repositório contém um script Bash para executar migrações no banco de dados PostgreSQL, garantindo que o cliente psql esteja instalado antes da execução.
+Para conseguir ver o funcionamento, é possível usar dados de migrations onde se encontra vários serviços que podem ser monitorados.
+
+Há um script Bash para executar migrações no banco de dados PostgreSQL, garantindo que o cliente psql esteja instalado antes da execução.
 
 Os dados migrados são apenas para testes locais, não devendo ser usados em ambientes de produção.
 
@@ -123,3 +125,14 @@ chmod +x ./scripts/migrations.sh
 ```bash
 ./scripts/migrations.sh
 ```
+
+# Como usar:
+
+Para monitorar um serviço basta cadastra-lo via endpoint. Atualmente apenas serviços via endpoint GET podem ser monitorados.
+
+## Endpoints
+
+ENDPOINT | METHOD | PARAMS | BODY | DESCRIPTION
+---------|--------|--------|------------------|---------------|
+/watchables | POST |  | name, url, checkInterval (em ms) | Cadastra um serviço para ser monitorado no intervalo de tempo fornecido
+/watchables/:id | GET | id |  | Recupera um serviço pelo id |
