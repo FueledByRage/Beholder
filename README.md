@@ -58,6 +58,9 @@ Com essa estrutura, o sistema pode evoluir com facilidade, permitindo mudanças 
    - Crie um arquivo `.env` na raiz do projeto seguindo o modelo disponibilizado em `.env.sample`.  
 
    - Preencha as variáveis conforme necessário, incluindo as credenciais do banco de dados e configurações dos serviços.  
+
+   - O Spring não recupera os dados do arquivo .env por padrão. Por isso é preciso adcionar ad envs diretamente no Sistema Operacional
+
 ## Containers
 
 Os serviços que o sistema necessita são rodados em containers docker que são orquestrados via docker-compose, no arquivo docker-compose.local.yml
