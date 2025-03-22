@@ -32,4 +32,10 @@ public class CreateWatchableDto implements CreateWatchable {
     @NotNull(message = "checkInterval may not be null")
     @Min(value = 1, message = "checkInterval may be greater than 0")
     private Integer checkInterval;
+
+    private String body;
+
+    private String credentials;
+
+    private String credentialsName;
 }

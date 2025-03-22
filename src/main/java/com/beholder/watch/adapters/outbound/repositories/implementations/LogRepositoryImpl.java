@@ -1,5 +1,6 @@
 package com.beholder.watch.adapters.outbound.repositories.implementations;
 
+import com.beholder.watch.adapters.utils.mappers.WatchableMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -18,12 +19,13 @@ import org.springframework.context.annotation.Lazy;
 @Repository
 public class LogRepositoryImpl implements LogRepository {
 
-  @Autowired
-  @Lazy
   private final JpaLogRepository jpaLogRepository;
 
-  public LogRepositoryImpl(JpaLogRepository jpaLogRepository) {
+  private final WatchableMapper watchableMapper;
+
+  public LogRepositoryImpl(@Lazy JpaLogRepository jpaLogRepository, WatchableMapper watchableMapper) {
     this.jpaLogRepository = jpaLogRepository;
+    this.watchableMapper = watchableMapper;
   }
 
   @Override
@@ -32,10 +34,7 @@ public class LogRepositoryImpl implements LogRepository {
 
     JpaEntityLog savedEntity = jpaLogRepository.save(jpaEntityLog);
 
-    Watchable watchable = new Watchable(savedEntity.getWatchable().getId(), savedEntity.getWatchable().getName(),
-        savedEntity.getWatchable().getUrl(), savedEntity.getWatchable().getCheckInterval(),
-        savedEntity.getWatchable().getStatus(), savedEntity.getWatchable().getCreatedAt(),
-        savedEntity.getWatchable().getUpdatedAt());
+    Watchable watchable = watchableMapper.mapToWatchable(savedEntity.getWatchable());
 
     return new Log(savedEntity.getId(), watchable, savedEntity.getResponseTime(),
         savedEntity.getResponseStatus(), savedEntity.getErrorMessage(), savedEntity.getCreatedAt(),
@@ -47,9 +46,7 @@ public class LogRepositoryImpl implements LogRepository {
     Optional<JpaEntityLog> jpaEntityLog = jpaLogRepository.findById(id).map(Optional::of).orElseGet(Optional::empty);
 
     return jpaEntityLog.map(entity -> {
-      Watchable watchable = new Watchable(entity.getWatchable().getId(), entity.getWatchable().getName(),
-          entity.getWatchable().getUrl(), entity.getWatchable().getCheckInterval(), entity.getWatchable().getStatus(),
-          entity.getWatchable().getCreatedAt(), entity.getWatchable().getUpdatedAt());
+      Watchable watchable = watchableMapper.mapToWatchable(entity.getWatchable());
 
       return new Log(entity.getId(), watchable, entity.getResponseTime(), entity.getResponseStatus(),
           entity.getErrorMessage(), entity.getCreatedAt(), entity.getUpdatedAt());

@@ -11,11 +11,6 @@ import lombok.Builder;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Min;
-
 @Data
 @Builder
 @AllArgsConstructor

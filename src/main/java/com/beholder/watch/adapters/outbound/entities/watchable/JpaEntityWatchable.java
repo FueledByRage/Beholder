@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Index;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Column;
 
 import com.beholder.watch.model.watchable.WatchableStatus;
 import com.beholder.watch.model.watchable.Watchable;
@@ -46,7 +47,20 @@ public class JpaEntityWatchable {
   private Integer checkInterval;
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "status", columnDefinition = "watchablestatus")
   private WatchableStatus status;
+
+  @Column(name = "body")
+  private String body;
+
+  @Column(name = "credentials")
+  private String credentials;
+
+  @Column(name = "credentials_name")
+  private String credentialsName;
+
+  @Column(name = "httpmethod")
+  private String httpMethod;
 
   @CreationTimestamp
   private Date createdAt;
@@ -62,6 +76,10 @@ public class JpaEntityWatchable {
     this.status = watchable.getStatus();
     this.createdAt = watchable.getCreatedAt();
     this.updatedAt = watchable.getUpdatedAt();
+    this.body = watchable.getBody();
+    this.credentials = watchable.getCredentials();
+    this.credentialsName = watchable.getCredentialsName();
+    this.httpMethod = watchable.getHttpMethod();
   }
 
 }

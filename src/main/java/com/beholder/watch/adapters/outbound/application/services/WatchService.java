@@ -1,6 +1,10 @@
 package com.beholder.watch.adapters.outbound.application.services;
 
+import com.beholder.watch.adapters.inbound.dtos.HttpRequestDetailsDto;
+import com.beholder.watch.dtos.usecases.HttpRequestDetails;
 import com.beholder.watch.usecases.TaskManagerUseCase;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory; 
 import org.springframework.stereotype.Service;
@@ -24,6 +28,8 @@ import org.springframework.context.annotation.Lazy;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import org.springframework.http.HttpMethod;
+
 
 
 @Service
@@ -35,8 +41,10 @@ public class WatchService implements WatchUseCase {
   private final WatchableMonitorUseCase watchableMonitorService;
   private final TaskManagerUseCase taskManager;
   private final ScheduleUseCase scheduleService;
+
   
   private static final Logger logger = LoggerFactory.getLogger(WatchService.class);
+  
   
   private static final int DEFAULT_PAGE_SIZE = 10;
   private static final int DEFAULT_START_PAGE = 0;
@@ -105,13 +113,17 @@ public class WatchService implements WatchUseCase {
   }
 
   public void watch(Watchable watchable) {
-      HttpResponseDetails response = this.getHttpResponseDetails(watchable);
-
-      this.updateWatchableStatus(watchable.getId(), response);
-
-      this.saveLog(watchable, response);
-
-      this.watchableMonitorService.updateMetrics(watchable.getName(), response);
+      try{
+        HttpResponseDetails response = this.getHttpResponseDetails(watchable);
+  
+        this.updateWatchableStatus(watchable.getId(), response);
+  
+        this.saveLog(watchable, response);
+  
+        this.watchableMonitorService.updateMetrics(watchable.getName(), response);
+      } catch (Exception e) {
+        logger.error("Error watching watchable: {}", watchable.getName(), e.getMessage());
+      }
     }
 
   private void startWatchables(List<Watchable> watchables) {
@@ -140,8 +152,28 @@ public class WatchService implements WatchUseCase {
     return response.getResponseStatus() == HttpStatus.SERVICE_UNAVAILABLE.value();
   }
 
-  private HttpResponseDetails getHttpResponseDetails(Watchable watchable) {
-    return httpService.getRequest(watchable.getUrl());
+  private HttpResponseDetails getHttpResponseDetails(Watchable watchable) throws IllegalArgumentException {
+    HttpMethod method = HttpMethod.valueOf(watchable.getHttpMethod());
+
+    HttpRequestDetails requestDetails = getHttpRequestDetails(watchable);
+
+    switch (method) {
+        case GET:
+            return httpService.getRequest(requestDetails);
+        case POST:
+            return httpService.postRequest(requestDetails);
+        default:
+            throw new IllegalArgumentException("Unsupported HTTP method: " + method);
+    }
+}
+
+  private HttpRequestDetails getHttpRequestDetails(Watchable watchable) {
+    return HttpRequestDetailsDto.builder()
+      .url(watchable.getUrl())
+      .body(watchable.getBody())
+      .credentials(watchable.getCredentials())
+      .credentialsName(watchable.getCredentialsName())
+      .build();
   }
 
   private void saveLog(Watchable watchable, HttpResponseDetails response) {

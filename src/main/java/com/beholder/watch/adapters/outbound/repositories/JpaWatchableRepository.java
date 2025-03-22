@@ -23,4 +23,7 @@ public interface JpaWatchableRepository extends JpaRepository<JpaEntityWatchable
 
   @Query("SELECT w FROM JpaEntityWatchable w WHERE w.name = :name")
   Optional<JpaEntityWatchable> findByName(String name);
+
+  @Query("SELECT w FROM JpaEntityWatchable w WHERE w.id = :id")
+  Optional<JpaEntityWatchable> findById(Long id);
 }

@@ -1,5 +1,6 @@
 package com.beholder.watch.adapters.inbound.controller;
 
+import com.beholder.watch.adapters.utils.mappers.WatchableMapper;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WatchableController {
         private final WatchableUseCases service;
+        private final WatchableMapper mapper;
 
         @PostMapping()
         public ResponseEntity<WatchableOutput> startWatch(
@@ -49,13 +51,7 @@ public class WatchableController {
                 Watchable watchable = service.findById(id).orElseThrow(
                                 () -> new RuntimeException("Watchable not found"));
 
-                WatchableOutputDto watchableOutput = WatchableOutputDto.builder()
-                                .id(watchable.getId())
-                                .name(watchable.getName())
-                                .url(watchable.getUrl())
-                                .checkInterval(watchable.getCheckInterval())
-                                .status(watchable.getStatus())
-                                .build();
+                WatchableOutputDto watchableOutput = mapper.mapToWatchableOutput(watchable);
 
                 return new ResponseEntity<WatchableOutput>(watchableOutput, HttpStatus.OK);
         }

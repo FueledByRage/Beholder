@@ -16,17 +16,29 @@ public class Watchable {
 
   private WatchableStatus status;
 
+  private String body;
+
+  private String credentials;
+
+  private String credentialsName;
+
+  private String httpMethod;
+
   private Date createdAt;
 
   private Date updatedAt;
 
-  public Watchable(Long id, String name, String url, Integer checkInterval, WatchableStatus status, Date createdAt,
-      Date updatedAt) {
+  public Watchable(Long id, String name, String url, Integer checkInterval, WatchableStatus status,
+  String body, String credentials, String credentialsName, String httpMethod, Date createdAt, Date updatedAt) {
     this.id = id;
     this.name = name;
     this.url = url;
     this.checkInterval = checkInterval;
     this.status = status;
+    this.body = body;
+    this.credentials = credentials;
+    this.credentialsName = credentialsName;
+    this.httpMethod = httpMethod;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }
@@ -88,5 +100,37 @@ public class Watchable {
 
   public void setUpdatedAt(Date updatedAt) {
     this.updatedAt = updatedAt;
+  }
+
+  public String getBody() {
+    return body;
+  }
+
+  public void setBody(String body) {
+    this.body = body;
+  }
+
+  public String getCredentials() {
+    return credentials;
+  }
+
+  public void setCredentials(String credentials) {
+    this.credentials = credentials;
+  }
+
+  public String getCredentialsName() {
+    return credentialsName;
+  }
+
+  public void setCredentialsName(String credentialsName) {
+    this.credentialsName = credentialsName;
+  }
+
+  public String getHttpMethod() {
+    return httpMethod;
+  }
+
+  public void setHttpMethod(String httpMethod) {
+    this.httpMethod = httpMethod;
   }
 }

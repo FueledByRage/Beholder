@@ -1,5 +1,6 @@
 package com.beholder.watch.adapters.outbound.application.services;
 
+import com.beholder.watch.dtos.usecases.HttpRequestDetails;
 import com.beholder.watch.model.watchable.WatchableStatus;
 import java.net.ConnectException;
 import org.springframework.stereotype.Service;
@@ -30,57 +31,80 @@ public class HttpService implements HttpUseCase {
 
 
   @Override
-  public HttpResponseDetails getRequest(String url) {
-    try {
-        long startTime = System.currentTimeMillis();
+  public HttpResponseDetails getRequest(HttpRequestDetails request) {
+      HttpHeaders headers = this.createHeaders(request.getCredentials(), request.getCredentialsName());
 
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+      HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-        long endTime = System.currentTimeMillis();
-        int responseTime = (int) (endTime - startTime);
-
-        return HttpResponseDetailsDto.builder()
-            .responseTime(responseTime)
-            .watchableStatus(WatchableStatus.UP)
-            .responseStatus(response.getStatusCodeValue())
-            .errorMessage(response.getStatusCode().getReasonPhrase())
-            .build();
-      
-    } catch (HttpClientErrorException.BadRequest e) {
-        return HttpResponseDetailsDto.builder()
-            .responseTime(0)
-            .watchableStatus(WatchableStatus.DOWN)
-            .responseStatus(HttpStatus.BAD_REQUEST.value())
-            .errorMessage(e.getResponseBodyAsString())
-            .build();
-      
-    } catch (HttpClientErrorException.Unauthorized e) {
-        return HttpResponseDetailsDto.builder()
-            .responseTime(0)
-            .watchableStatus(WatchableStatus.DOWN)
-            .responseStatus(HttpStatus.UNAUTHORIZED.value())
-            .errorMessage(e.getResponseBodyAsString())
-            .build();
-      
-    } catch (ResourceAccessException e) {
-        return HttpResponseDetailsDto.builder()
-            .responseTime(0)
-            .watchableStatus(WatchableStatus.DOWN)
-            .responseStatus(HttpStatus.SERVICE_UNAVAILABLE.value())
-            .errorMessage(SERVICE_UNAVAILABLE_MESSAGE)
-            .build();
-      
-    } catch (Exception e) {
-        return HttpResponseDetailsDto.builder()
-            .responseTime(0)
-            .watchableStatus(WatchableStatus.DOWN)
-            .responseStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
-            .errorMessage(e.getMessage())
-            .build();
+      return executeRequest(request.getUrl(), HttpMethod.GET, entity);
     }
-}
 
+    @Override
+    public HttpResponseDetails postRequest(HttpRequestDetails request) {
+        HttpHeaders headers = this.createHeaders(request.getCredentials(), request.getCredentialsName());
+
+        HttpEntity<String> entity = new HttpEntity<>(request.getBody(), headers);
+
+        return executeRequest(request.getUrl(), HttpMethod.POST, entity);
+    }
+
+    private HttpHeaders createHeaders(String credentials, String credentialsName) {
+        if(credentials == null || credentialsName == null) {
+            return new HttpHeaders();
+        }
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(credentials, credentialsName);
+        return headers;
+    }
+
+    private HttpResponseDetails executeRequest(String url, HttpMethod method, HttpEntity entity) {
+        try {
+            long startTime = System.currentTimeMillis();
+
+            ResponseEntity<String> response = restTemplate.exchange(url, method, entity, String.class);
+
+            long endTime = System.currentTimeMillis();
+            int responseTime = (int) (endTime - startTime);
+
+            return HttpResponseDetailsDto.builder()
+                .responseTime(responseTime)
+                .watchableStatus(WatchableStatus.UP)
+                .responseStatus(response.getStatusCodeValue())
+                .errorMessage(response.getStatusCode().getReasonPhrase())
+                .build();
+        
+        } catch (HttpClientErrorException.BadRequest e) {
+            return HttpResponseDetailsDto.builder()
+                .responseTime(0)
+                .watchableStatus(WatchableStatus.DOWN)
+                .responseStatus(HttpStatus.BAD_REQUEST.value())
+                .errorMessage(e.getResponseBodyAsString())
+                .build();
+        
+        } catch (HttpClientErrorException.Unauthorized e) {
+            return HttpResponseDetailsDto.builder()
+                .responseTime(0)
+                .watchableStatus(WatchableStatus.DOWN)
+                .responseStatus(HttpStatus.UNAUTHORIZED.value())
+                .errorMessage(e.getResponseBodyAsString())
+                .build();
+        
+        } catch (ResourceAccessException e) {
+            return HttpResponseDetailsDto.builder()
+                .responseTime(0)
+                .watchableStatus(WatchableStatus.DOWN)
+                .responseStatus(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .errorMessage(SERVICE_UNAVAILABLE_MESSAGE)
+                .build();
+        
+        } catch (Exception e) {
+            return HttpResponseDetailsDto.builder()
+                .responseTime(0)
+                .watchableStatus(WatchableStatus.DOWN)
+                .responseStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .errorMessage(e.getMessage())
+                .build();
+        }
+    }
 }

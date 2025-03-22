@@ -8,4 +8,8 @@ public interface WatchableOutput {
   public String getUrl();
   public Integer getCheckInterval();
   public WatchableStatus getStatus();
+  public String getBody();
+  public String getCredentials();
+  public String getHttpMethod();
+  public String getCredentialsName();
 }

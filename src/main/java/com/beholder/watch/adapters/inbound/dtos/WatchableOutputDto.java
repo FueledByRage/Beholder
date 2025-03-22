@@ -27,4 +27,8 @@ public class WatchableOutputDto implements WatchableOutput {
     private String url;
     private Integer checkInterval;
     private WatchableStatus status;
+    private String httpMethod;
+    private String body;
+    private String credentials;
+    private String credentialsName;
 }

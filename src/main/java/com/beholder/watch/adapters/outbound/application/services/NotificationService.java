@@ -44,7 +44,6 @@ public class NotificationService implements NotificationUseCase {
     private Notification buildNotification(CreateNotification createNotificationRequest) {
         Watchable watchable = findWatchable(createNotificationRequest.getWatchableName());
         Date sentAt = parseDate(createNotificationRequest.getSentAt());
-        System.out.println(" - NotificationService.buildNotification: watchable=" + watchable + ", sentAt=" + sentAt);
         return new Notification(watchable, createNotificationRequest.getMessage(), sentAt);
     }
 
