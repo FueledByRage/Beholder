@@ -132,7 +132,8 @@ Para monitorar um serviço basta cadastra-lo via endpoint. Atualmente apenas ser
 
 ## Endpoints
 
+
 ENDPOINT | METHOD | PARAMS | BODY | DESCRIPTION
 ---------|--------|--------|------------------|---------------|
-/watchables | POST |  | name, url, checkInterval (em ms) | Cadastra um serviço para ser monitorado no intervalo de tempo fornecido
-/watchables/:id | GET | id |  | Recupera um serviço pelo id |
+/watchables | POST |  | name, url, checkInterval (in ms), body (opcional), credentials (opcional), credentialsName (opcional) | Creates a service to be monitored at the provided time interval
+/watchables/:id | GET | id |  | Retrieves a service by id |

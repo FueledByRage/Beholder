@@ -35,13 +35,7 @@ public class WatchableController {
                         @Valid @RequestBody CreateWatchableDto request) {
                 Watchable watchable = service.startWatch(request);
 
-                WatchableOutputDto watchableOutput = WatchableOutputDto.builder()
-                                .id(watchable.getId())
-                                .name(watchable.getName())
-                                .url(watchable.getUrl())
-                                .checkInterval(watchable.getCheckInterval())
-                                .status(watchable.getStatus())
-                                .build();
+                WatchableOutputDto watchableOutput = mapper.mapToWatchableOutput(watchable);    
 
                 return new ResponseEntity<WatchableOutput>(watchableOutput, HttpStatus.CREATED);
         }

@@ -38,4 +38,6 @@ public class CreateWatchableDto implements CreateWatchable {
     private String credentials;
 
     private String credentialsName;
+
+    private String httpMethod;
 }

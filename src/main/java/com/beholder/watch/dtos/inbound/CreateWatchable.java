@@ -7,4 +7,5 @@ public interface CreateWatchable {
   public String getBody();
   public String getCredentials();
   public String getCredentialsName();
+  public String getHttpMethod();
 }
