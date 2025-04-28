@@ -7,14 +7,22 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${PG_DATABASE}
-
     ports:
       - "5432:5432"
+    networks:
+      - db-network
+
   adminer:
     image: adminer
     restart: always
     ports:
       - "8000:8080"
+    networks:
+      - db-network
+      - adminer-network
+    depends_on:
+      - database
+
   prometheus:
     image: prom/prometheus
     user: root
@@ -27,7 +35,9 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
-    network_mode: "host"
+    networks:
+      - monitoring-network
+
   grafana:
     image: grafana/grafana
     hostname: grafana
@@ -37,4 +47,15 @@ services:
     volumes:
       - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards
       - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources
-    network_mode: "host"
+    networks:
+      - monitoring-network
+    depends_on:
+      - prometheus
+
+networks:
+  db-network:
+    driver: bridge
+  adminer-network:
+    driver: bridge
+  monitoring-network:
+    driver: bridge
