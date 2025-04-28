@@ -67,7 +67,6 @@ public class JpaWatchableService implements WatchableUseCases {
 
   @Override
   public Optional<Watchable> findById(Long id) {
-    Watchable watchable = this.watchableRepository.findById(id).get();
     return this.watchableRepository.findById(id);
   }
 
