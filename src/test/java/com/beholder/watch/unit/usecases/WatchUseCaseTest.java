@@ -3,6 +3,7 @@ import com.beholder.watch.adapters.outbound.application.services.JpaLogService;
 import com.beholder.watch.adapters.outbound.application.services.JpaWatchableService;
 import com.beholder.watch.adapters.outbound.application.services.TaskManagerService;
 import com.beholder.watch.adapters.outbound.application.services.WatchService;
+import com.beholder.watch.adapters.inbound.dtos.HttpRequestDetailsDto;
 import com.beholder.watch.dtos.usecases.HttpResponseDetails;
 import com.beholder.watch.model.watchable.Watchable;
 import com.beholder.watch.model.watchable.WatchableStatus;
@@ -51,6 +52,9 @@ class WatchSUseCaseTest {
     private WatchService watchService;
 
     private Watchable MOCK_WATCHABLE = new Watchable();
+    private HttpRequestDetailsDto MOCK_REQUEST = HttpRequestDetailsDto.builder()
+    .url("http://test.com")
+    .build();
 
     private HttpResponseDetails MOCK_RESPONSE = HttpResponseDetailsDto.builder()
     .responseStatus(HttpStatus.OK.value())
@@ -63,6 +67,7 @@ class WatchSUseCaseTest {
         MOCK_WATCHABLE.setId(1L);
         MOCK_WATCHABLE.setName("Test Watchable");
         MOCK_WATCHABLE.setUrl("http://test.com");
+        MOCK_WATCHABLE.setHttpMethod("GET");
         MOCK_WATCHABLE.setCheckInterval(30);
     }
 
@@ -77,11 +82,11 @@ class WatchSUseCaseTest {
 
     @Test
     void shouldWatchAndUpdateMetrics() {
-        when(httpService.getRequest(MOCK_WATCHABLE.getUrl())).thenReturn(MOCK_RESPONSE);
+        when(httpService.getRequest(MOCK_REQUEST)).thenReturn(MOCK_RESPONSE);
 
         watchService.watch(MOCK_WATCHABLE);
 
-        verify(httpService, times(1)).getRequest(MOCK_WATCHABLE.getUrl());
+        verify(httpService, times(1)).getRequest(MOCK_REQUEST);
         verify(watchableService, times(1)).updateWatchableStatus(eq(1L), eq(WatchableStatus.UP));
         verify(logService, times(1)).save(any(Log.class));
         verify(watchableMonitorService, times(1)).updateMetrics(eq("Test Watchable"), eq(MOCK_RESPONSE));

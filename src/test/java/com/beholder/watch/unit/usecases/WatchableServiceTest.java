@@ -57,7 +57,7 @@ public class WatchableServiceTest {
 
     when(watchableRepository.save(any(Watchable.class))).thenReturn(WATCHABLE);
 
-    Watchable savedWatchable = jpaWatchableService.save(CREATE_WATCHABLE_REQUEST);
+    jpaWatchableService.save(CREATE_WATCHABLE_REQUEST);
 
     verify(watchableRepository, times(1)).save(any(Watchable.class));
   }
