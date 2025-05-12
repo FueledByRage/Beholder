@@ -13,6 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.beans.BeanUtils;
 
 import java.util.List;
+import java.util.Arrays;
 import java.util.Optional;
 
 import com.beholder.watch.model.watchable.WatchableStatus;
@@ -103,7 +104,8 @@ public class WatchableServiceTest {
 
   @Test
   public void shouldFindByPageSuccessfully() {
-    when(watchableRepository.findAll(10, 1)).thenReturn(List.of(WATCHABLE));
+    List<Watchable> watchableList = Arrays.asList(WATCHABLE);
+    when(watchableRepository.findAll(10, 1)).thenReturn(watchableList);
 
     List<Watchable> watchables = jpaWatchableService.findByPage(10, 1);
 

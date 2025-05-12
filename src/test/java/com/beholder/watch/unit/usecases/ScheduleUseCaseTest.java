@@ -12,7 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.beholder.watch.adapters.outbound.application.services.ScheduleService;
 import static org.mockito.Mockito.times;
 
-
+import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -44,7 +44,8 @@ public class ScheduleUseCaseTest {
 
   @Test
   public void shouldScheduleMultipleTasksSuccessfully() {
-    scheduleService.scheduleTasks(List.of(TASK1, TASK2), 2000L);
+    List<Runnable> tasks = Arrays.asList(TASK1, TASK2);
+    scheduleService.scheduleTasks(tasks, 2000L);
 
     verify(taskScheduler, times(1)).scheduleAtFixedRate(TASK1, 2000L);
     verify(taskScheduler, times(1)).scheduleAtFixedRate(TASK2, 2000L);

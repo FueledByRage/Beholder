@@ -76,7 +76,7 @@ public class WatchableMonitorServiceTest {
 
     @Test
     public void shouldTruncateErrorMessageIfTooLong() {
-        String longErrorMessage = "a".repeat(150);
+        String longErrorMessage = new String(new char[150]).replace('\0', 'a');
         HttpResponseDetails httpResponseDetails = HttpResponseDetailsDto.builder()
             .responseTime(RESPONSE_TIME)
             .watchableStatus(WatchableStatus.UP)
