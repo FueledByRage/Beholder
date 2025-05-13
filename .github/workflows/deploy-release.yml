@@ -113,7 +113,7 @@ jobs:
             
             echo "JAR encontrado: $JAR_NAME"
             echo "DATABASE URL"
-            echo "${DATABASE_URL}"
+            echo $DATABASE_URL
             
             echo "=== Movendo JAR para ~/app.jar ==="
             cp "$JAR_NAME" ~/app.jar.new
