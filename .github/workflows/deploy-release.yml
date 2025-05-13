@@ -33,50 +33,7 @@ jobs:
         with:
           name: app-jar
           path: build/libs/*.jar
-  check_jar:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check for JAR file
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT }}
-          script: |
-            echo "=== Verificando JAR em /tmp ==="
-            ls -la /tmp/*.jar 2>/dev/null || echo "Nenhum JAR encontrado em /tmp"
 
-  stop_app:
-      runs-on: ubuntu-latest
-      needs: check_jar
-      steps:
-        - name: Create stop script
-          uses: appleboy/ssh-action@master
-          with:
-            host: ${{ secrets.HOST }}
-            username: ${{ secrets.USERNAME }}
-            key: ${{ secrets.SSH_KEY }}
-            port: ${{ secrets.PORT }}
-            script: |
-              echo "#!/bin/bash" > ~/stop_app.sh
-              echo "echo 'Parando aplicação Java...'" >> ~/stop_app.sh
-              echo "for PID in \$(ps -ef | grep 'java -jar' | grep -v grep | awk '{print \$2}'); do" >> ~/stop_app.sh
-              echo "  echo \"Encerrando processo \$PID\"" >> ~/stop_app.sh
-              echo "  kill -15 \$PID || echo \"Falha ao encerrar \$PID\"" >> ~/stop_app.sh
-              echo "done" >> ~/stop_app.sh
-              echo "echo 'Parando concluído'" >> ~/stop_app.sh
-              chmod +x ~/stop_app.sh
-
-        - name: Execute stop script
-          uses: appleboy/ssh-action@master
-          with:
-            host: ${{ secrets.HOST }}
-            username: ${{ secrets.USERNAME }}
-            key: ${{ secrets.SSH_KEY }}
-            port: ${{ secrets.PORT }}
-            script: |
-              ~/stop_app.sh
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
@@ -92,20 +49,59 @@ jobs:
       - name: Send JAR to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
           source: "*.jar"
           target: "/tmp/"
+
+      - name: Check for JAR file
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            echo "=== Verificando JAR em /tmp ==="
+            ls -la /tmp/*.jar 2>/dev/null || echo "Nenhum JAR encontrado em /tmp"
+
+      - name: Create stop script
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            echo "#!/bin/bash" > ~/stop_app.sh
+            echo "echo 'Parando aplicação Java...'" >> ~/stop_app.sh
+            echo "for PID in \$(ps -ef | grep 'java -jar' | grep -v grep | awk '{print \$2}'); do" >> ~/stop_app.sh
+            echo "  echo \"Encerrando processo \$PID\"" >> ~/stop_app.sh
+            echo "  kill -15 \$PID || echo \"Falha ao encerrar \$PID\"" >> ~/stop_app.sh
+            echo "done" >> ~/stop_app.sh
+            echo "echo 'Parando concluído'" >> ~/stop_app.sh
+            chmod +x ~/stop_app.sh
+
+      - name: Execute stop script
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            ~/stop_app.sh
 
       - name: Deploy app on EC2
         uses: appleboy/ssh-action@master
         env:
           DEBUG: true
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
           script: |
             echo "=== Buscando JAR ==="
             JAR_NAME=$(ls /tmp/*.jar 2>/dev/null | head -n1)
@@ -130,4 +126,3 @@ jobs:
             # Verificar o status após inicialização
             sleep 2
             ps -ef | grep 'java -jar app.jar' | grep -v grep || echo "AVISO: Processo não encontrado após inicialização"
-          
