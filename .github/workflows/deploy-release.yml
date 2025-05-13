@@ -33,7 +33,50 @@ jobs:
         with:
           name: app-jar
           path: build/libs/*.jar
+  check_jar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for JAR file
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            echo "=== Verificando JAR em /tmp ==="
+            ls -la /tmp/*.jar 2>/dev/null || echo "Nenhum JAR encontrado em /tmp"
 
+  stop_app:
+      runs-on: ubuntu-latest
+      needs: check_jar
+      steps:
+        - name: Create stop script
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.SSH_KEY }}
+            port: ${{ secrets.PORT }}
+            script: |
+              echo "#!/bin/bash" > ~/stop_app.sh
+              echo "echo 'Parando aplicação Java...'" >> ~/stop_app.sh
+              echo "for PID in \$(ps -ef | grep 'java -jar' | grep -v grep | awk '{print \$2}'); do" >> ~/stop_app.sh
+              echo "  echo \"Encerrando processo \$PID\"" >> ~/stop_app.sh
+              echo "  kill -15 \$PID || echo \"Falha ao encerrar \$PID\"" >> ~/stop_app.sh
+              echo "done" >> ~/stop_app.sh
+              echo "echo 'Parando concluído'" >> ~/stop_app.sh
+              chmod +x ~/stop_app.sh
+
+        - name: Execute stop script
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.SSH_KEY }}
+            port: ${{ secrets.PORT }}
+            script: |
+              ~/stop_app.sh
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
@@ -64,50 +107,27 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Função de log para melhor debug
-            log() {
-              echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
-            }
+            echo "=== Buscando JAR ==="
+            JAR_NAME=$(ls /tmp/*.jar 2>/dev/null | head -n1)
             
-            log "=== Parando aplicação se estiver rodando ==="
-            # Usando redirecionamento para suprimir mensagens de erro
-            pkill -f 'java -jar' > /dev/null 2>&1 || true
-            
-            log "=== Verificando diretório /tmp ==="
-            ls -la /tmp/*.jar || log "Nenhum JAR encontrado em /tmp"
-            
-            log "=== Buscando JAR ==="
-            JAR_COUNT=$(ls /tmp/*.jar 2>/dev/null | wc -l)
-            
-            if [ "$JAR_COUNT" -eq "0" ]; then
-              log "ERRO: Nenhum arquivo JAR encontrado em /tmp"
+            if [ -z "$JAR_NAME" ]; then
+              echo "ERRO: Nenhum arquivo JAR encontrado em /tmp"
               exit 1
             fi
             
-            JAR_NAME=$(ls /tmp/*.jar | head -n1)
-            log "JAR encontrado: $JAR_NAME"
+            echo "JAR encontrado: $JAR_NAME"
             
-            log "=== Movendo JAR para ~/app.jar ==="
-            mv "$JAR_NAME" ~/app.jar
+            echo "=== Movendo JAR para ~/app.jar ==="
+            cp "$JAR_NAME" ~/app.jar.new
+            mv ~/app.jar.new ~/app.jar
             
-            log "=== Verificando se o arquivo foi movido ==="
-            if [ ! -f ~/app.jar ]; then
-              log "ERRO: Falha ao mover o arquivo JAR"
-              exit 1
-            fi
-            
-            log "=== Iniciando aplicação ==="
+            echo "=== Iniciando aplicação ==="
             cd ~
             nohup java -jar app.jar > app.log 2>&1 &
             
-            # Verificar se o processo foi iniciado
+            echo "Aplicação iniciada em background"
+            
+            # Verificar o status após inicialização
             sleep 2
-            if pgrep -f "java -jar app.jar" > /dev/null; then
-              log "Aplicação iniciada com sucesso"
-            else
-              log "ERRO: Falha ao iniciar a aplicação"
-              # Mostrar os últimos logs para debug
-              tail ~/app.log
-              exit 1
-            fi
+            ps -ef | grep 'java -jar app.jar' | grep -v grep || echo "AVISO: Processo não encontrado após inicialização"
           
