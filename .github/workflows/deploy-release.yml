@@ -64,18 +64,50 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "=== Parando aplicação se estiver rodando ==="
-            pkill -f 'java -jar' || true
+            # Função de log para melhor debug
+            log() {
+              echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
+            }
             
-            echo "=== Buscando JAR ==="
+            log "=== Parando aplicação se estiver rodando ==="
+            # Usando redirecionamento para suprimir mensagens de erro
+            pkill -f 'java -jar' > /dev/null 2>&1 || true
+            
+            log "=== Verificando diretório /tmp ==="
+            ls -la /tmp/*.jar || log "Nenhum JAR encontrado em /tmp"
+            
+            log "=== Buscando JAR ==="
+            JAR_COUNT=$(ls /tmp/*.jar 2>/dev/null | wc -l)
+            
+            if [ "$JAR_COUNT" -eq "0" ]; then
+              log "ERRO: Nenhum arquivo JAR encontrado em /tmp"
+              exit 1
+            fi
+            
             JAR_NAME=$(ls /tmp/*.jar | head -n1)
-            echo "JAR encontrado: $JAR_NAME"
+            log "JAR encontrado: $JAR_NAME"
             
-            echo "=== Movendo JAR para ~/app.jar ==="
+            log "=== Movendo JAR para ~/app.jar ==="
             mv "$JAR_NAME" ~/app.jar
             
-            echo "=== Iniciando aplicação ==="
+            log "=== Verificando se o arquivo foi movido ==="
+            if [ ! -f ~/app.jar ]; then
+              log "ERRO: Falha ao mover o arquivo JAR"
+              exit 1
+            fi
+            
+            log "=== Iniciando aplicação ==="
             cd ~
             nohup java -jar app.jar > app.log 2>&1 &
-            echo "Aplicação iniciada em background"
+            
+            # Verificar se o processo foi iniciado
+            sleep 2
+            if pgrep -f "java -jar app.jar" > /dev/null; then
+              log "Aplicação iniciada com sucesso"
+            else
+              log "ERRO: Falha ao iniciar a aplicação"
+              # Mostrar os últimos logs para debug
+              tail ~/app.log
+              exit 1
+            fi
           
