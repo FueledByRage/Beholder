@@ -126,7 +126,7 @@ jobs:
             
             echo "=== Iniciando aplicação ==="
             cd ~
-            nohup bash -c "source ~/app.env && java -jar app.jar" > app.log 2>&1 &
+            java -jar app.jar
             
             echo "Aplicação iniciada em background"
             
