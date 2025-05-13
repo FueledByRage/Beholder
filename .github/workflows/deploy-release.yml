@@ -66,7 +66,11 @@ jobs:
           script: |
             pkill -f 'java -jar' || true
             JAR_NAME=$(ls /tmp/*.jar | head -n1)
+            ls
+            echo $JAR_NAME
             mv "$JAR_NAME" ~/app.jar
             cd ~
+            ls
+            echo $DATABASE_URL
             setsid java -jar app.jar > app.log 2>&1 < /dev/null &
           
