@@ -112,6 +112,8 @@ jobs:
             fi
             
             echo "JAR encontrado: $JAR_NAME"
+            echo "DATABASE URL"
+            echo "${DATABASE_URL}
             
             echo "=== Movendo JAR para ~/app.jar ==="
             cp "$JAR_NAME" ~/app.jar.new
@@ -124,5 +126,5 @@ jobs:
             echo "Aplicação iniciada em background"
             
             # Verificar o status após inicialização
-            sleep 2
+            sleep 4
             ps -ef | grep 'java -jar app.jar' | grep -v grep || echo "AVISO: Processo não encontrado após inicialização"
