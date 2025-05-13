@@ -64,13 +64,18 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            echo "=== Parando aplicação se estiver rodando ==="
             pkill -f 'java -jar' || true
+            
+            echo "=== Buscando JAR ==="
             JAR_NAME=$(ls /tmp/*.jar | head -n1)
-            ls
-            echo $JAR_NAME
+            echo "JAR encontrado: $JAR_NAME"
+            
+            echo "=== Movendo JAR para ~/app.jar ==="
             mv "$JAR_NAME" ~/app.jar
+            
+            echo "=== Iniciando aplicação ==="
             cd ~
-            ls
-            echo $DATABASE_URL
-            setsid java -jar app.jar > app.log 2>&1 < /dev/null &
+            nohup java -jar app.jar > app.log 2>&1 &
+            echo "Aplicação iniciada em background"
           
