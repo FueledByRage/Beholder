@@ -56,7 +56,9 @@ jobs:
           target: "/tmp/"
 
       - name: Deploy app on EC2
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@master
+        env:
+          DEBUG: true
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
